@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR & Image Processing App</title>
+</head>
+<body>
+    <h1>OCR & Image Processing Web App</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="file">Upload PDF/Image:</label>
+        <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg" required>
+        <button type="submit">Upload File</button>
+    </form>
+
+    <div id="output">
+        <h2>Processing Result:</h2>
+        <p id="message"></p>
+        <ul id="driveLinks"></ul>
+        <a id="downloadLink" href="#">Download CSV Report</a>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = async function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('file', document.getElementById('file').files[0]);
+            console.log(formData)
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok) {
+                document.getElementById('message').innerText = result.message;
+                const filePath = result.file_path;
+
+                // Start processing after upload
+                const processResponse = await fetch('/process', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ file_path: filePath })
+                });
+                const processResult = await processResponse.json();
+                document.getElementById('message').innerText = processResult.message;
+
+                // Display Drive links
+                const driveLinks = processResult.drive_links.map(link => `<li><a href="${link.url}" target="_blank">${link.folder}</a></li>`).join('');
+                document.getElementById('driveLinks').innerHTML = driveLinks;
+
+                // Provide a download link for the report
+                document.getElementById('downloadLink').href = `/download/report.csv`;
+            } else {
+                document.getElementById('message').innerText = result.message;
+            }
+        };
+    </script>
+</body>
+</html>

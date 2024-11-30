@@ -1,0 +1,5 @@
+{
+    "output_folder": "outputs",
+    "search_terms": ["NAME", "PERIOD COVERED"],
+    "slice_count_default": 4
+}

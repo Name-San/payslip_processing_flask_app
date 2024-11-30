@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template
 import os
 import shutil
-from image_ocr import ocr
-from image_editor import edit_image
-from connect_gdrive import access_drive
+from modules.image_ocr import ocr
+from modules.image_editor import edit_image
+from modules.connect_gdrive import access_drive
 import json
 import csv
 

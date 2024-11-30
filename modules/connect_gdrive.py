@@ -4,6 +4,15 @@ from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
 import os
 import pickle
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+
+if not credentials_path:
+    raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set!")
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
@@ -22,7 +31,7 @@ def authenticate_user(user_id):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials/credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
             creds = flow.run_local_server(port=0)
 
         # Save the credentials for the user

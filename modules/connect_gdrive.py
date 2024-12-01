@@ -10,11 +10,17 @@ import base64
 load_dotenv()
 
 credentials_base64 = os.getenv("GOOGLE_CREDENTIALS")
+
 if credentials_base64:
-    credentials_path = "credentials/credentials.json"  # Dynamic path for the JSON file
-    os.makedirs(os.path.dirname(credentials_path), exist_ok=True)  # Ensure folder exists
-    with open(credentials_path, "w") as cred_file:
-        cred_file.write(base64.b64decode(credentials_base64).decode("utf-8"))
+    try:
+        # Decode Base64 and write to the credentials.json file
+        credentials_path = "credentials/credentials.json"
+        os.makedirs(os.path.dirname(credentials_path), exist_ok=True)
+        with open(credentials_path, "w") as cred_file:
+            cred_file.write(base64.b64decode(credentials_base64).decode("utf-8"))
+    except Exception as e:
+        print(f"Error decoding GOOGLE_CREDENTIALS: {e}")
+
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 

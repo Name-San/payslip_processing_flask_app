@@ -2,17 +2,24 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
+from dotenv import load_dotenv
 import os
 import pickle
-from dotenv import load_dotenv
-
+import base64
 
 load_dotenv()
 
-credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+credentials_base64 = os.getenv("GOOGLE_CREDENTIALS")
+if credentials_base64:
+    credentials_path = "credentials/credentials.json"  # Dynamic path for the JSON file
+    os.makedirs(os.path.dirname(credentials_path), exist_ok=True)  # Ensure folder exists
+    with open(credentials_path, "w") as cred_file:
+        cred_file.write(base64.b64decode(credentials_base64).decode("utf-8"))
+else:
+    credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if not credentials_path:
+        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS is not set in the .env file.")
 
-if not credentials_path:
-    raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set!")
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 

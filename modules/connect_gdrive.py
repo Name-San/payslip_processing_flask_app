@@ -2,32 +2,38 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
-from dotenv import load_dotenv
 import os
 import pickle
 import base64
+import json
+from dotenv import load_dotenv
 
+# Load the environment variables from .env
 load_dotenv()
-
-credentials_base64 = os.getenv("GOOGLE_CREDENTIALS")
-
-if credentials_base64:
-    try:
-        # Decode Base64 and write to the credentials.json file
-        credentials_path = "credentials/credentials.json"
-        os.makedirs(os.path.dirname(credentials_path), exist_ok=True)
-        with open(credentials_path, "w") as cred_file:
-            cred_file.write(base64.b64decode(credentials_base64).decode("utf-8"))
-    except Exception as e:
-        print(f"Error decoding GOOGLE_CREDENTIALS: {e}")
 
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
+
+
+def load_google_credentials():
+    encoded_credentials = os.getenv('GOOGLE_CREDENTIALS')
+    print(encoded_credentials)
+    if not encoded_credentials:
+        raise EnvironmentError("GOOGLE_CREDENTIALS not set in environment variables")
+    
+    # Decode the Base64 string
+    credentials_json = base64.b64decode(encoded_credentials).decode('utf-8')
+    return json.loads(credentials_json)
+
 
 def authenticate_user(user_id):
     """Authenticate a user and save their credentials separately."""
     token_file = f'tokens/{user_id}_token.pickle'
     creds = None
+
+    credentials = load_google_credentials()
+    with open('credentials/credentials_temp.json', 'w') as temp_file:
+        temp_file.write(json.dumps(credentials))
 
     # Check if user's token exists
     if os.path.exists(token_file):
@@ -39,7 +45,7 @@ def authenticate_user(user_id):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file("credentials/credentials_temp.json", SCOPES)
             creds = flow.run_local_server(port=0)
 
         # Save the credentials for the user

@@ -15,11 +15,6 @@ if credentials_base64:
     os.makedirs(os.path.dirname(credentials_path), exist_ok=True)  # Ensure folder exists
     with open(credentials_path, "w") as cred_file:
         cred_file.write(base64.b64decode(credentials_base64).decode("utf-8"))
-else:
-    credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    if not credentials_path:
-        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS is not set in the .env file.")
-
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 

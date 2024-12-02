@@ -8,6 +8,7 @@ def convert_pdf_to_image(pdf, output):
         os.makedirs(converted_folder)
 
     POPPLER_PATH = os.getenv("POPPLER_PATH")
+    print(POPPLER_PATH)
             
     images = convert_from_path(pdf, poppler_path=POPPLER_PATH)
     images_path = []

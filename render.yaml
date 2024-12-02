@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: PayslipProcessingApp
+    env: python
+    buildCommand: |
+      apt-get update && apt-get install -y poppler-utils 
+      apt install tesseract-ocr
+      apt install libtesseract-dev
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    plan: free  # Use Render's free plan
+    envVars:
+      - key: GOOGLE_CREDENTIALS
+        sync: false  # Ensure sensitive variables are managed via Render Dashboard
+    staticPublishPath: static

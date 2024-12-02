@@ -7,17 +7,16 @@ def convert_pdf_to_image(pdf, output):
     if not os.path.exists(converted_folder):
         os.makedirs(converted_folder)
 
-    POPPLER_PATH = os.getenv("POPPLER_PATH")
-    poppler_fullpath = os.path.join(os.getcwd(), POPPLER_PATH)
-    print(poppler_fullpath)
-            
-    images = convert_from_path(pdf, poppler_path=r"/opt/render/project/src/poppler-24.08.0/Library/bin")
-    images_path = []
-    for idx, image in enumerate(images):
-        image_path = os.path.join(converted_folder, f"page_{idx+1}.png")
-        image.save(image_path, "PNG")
-        images_path.append(image_path)
-    return images_path
+    try:    
+        images = convert_from_path(pdf)
+        images_path = []
+        for idx, image in enumerate(images):
+            image_path = os.path.join(converted_folder, f"page_{idx+1}.png")
+            image.save(image_path, "PNG")
+            images_path.append(image_path)
+        return images_path
+    except Exception as e:
+        print(f"Error in converting pdf: {e}")
         
 def slice_image(image_path, slices_count, output_folder):
     try:

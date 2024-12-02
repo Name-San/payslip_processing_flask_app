@@ -6,10 +6,6 @@ import os
 import pickle
 import base64
 import json
-from dotenv import load_dotenv
-
-# Load the environment variables from .env
-load_dotenv()
 
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']

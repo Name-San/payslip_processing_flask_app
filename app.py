@@ -6,6 +6,10 @@ from modules.image_editor import edit_image
 from modules.connect_gdrive import access_drive
 import json
 import csv
+from dotenv import load_dotenv
+
+# Load the environment variables from .env
+load_dotenv()
 
 
 app = Flask(__name__)

@@ -6,8 +6,10 @@ def convert_pdf_to_image(pdf, output):
     converted_folder = f"{output}/converted"
     if not os.path.exists(converted_folder):
         os.makedirs(converted_folder)
-        
-    images = convert_from_path(pdf, poppler_path = r"poppler-24.08.0\Library\bin")
+
+    POPPLER_PATH = os.getenv("POPPLER_PATH")
+            
+    images = convert_from_path(pdf, poppler_path=POPPLER_PATH)
     images_path = []
     for idx, image in enumerate(images):
         image_path = os.path.join(converted_folder, f"page_{idx+1}.png")

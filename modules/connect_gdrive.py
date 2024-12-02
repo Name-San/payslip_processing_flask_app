@@ -13,7 +13,6 @@ SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
 def load_google_credentials():
     encoded_credentials = os.getenv('GOOGLE_CREDENTIALS')
-    print(encoded_credentials)
     if not encoded_credentials:
         raise EnvironmentError("GOOGLE_CREDENTIALS not set in environment variables")
     

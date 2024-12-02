@@ -6,6 +6,7 @@ from modules.image_editor import edit_image
 from modules.connect_gdrive import access_drive
 import json
 import csv
+
 from dotenv import load_dotenv
 
 # Load the environment variables from .env
@@ -28,10 +29,10 @@ def load_config(config_path="configs/config.json"):
 
 # Generate CSV report
 def generate_csv(data):
-    if not os.path.exists("outputs"):
-        os.makedirs("outputs")
+    if not os.path.exists("reports"):
+        os.makedirs("reports")
     heading = [v for k, v in enumerate(data[0])]
-    with open('outputs/report.csv', mode='w', newline='', encoding='utf-8') as file:
+    with open('reports/report.csv', mode='w', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=heading)
         writer.writeheader()
         writer.writerows(data)
@@ -72,10 +73,13 @@ def process_file():
     # Generate CSV report
     generate_csv(reports)
 
+    for dir in ["outputs", "uploads", "tokens"]:
+        shutil.rmtree(dir)
+
     return jsonify({
         'message': 'Processing complete',
         'sliced_images': sliced_images,
-        'csv_report': 'outputs/report.csv',
+        'csv_report': 'reports/report.csv',
         'drive_links': reports
     })
 

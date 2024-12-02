@@ -49,7 +49,7 @@
                 document.getElementById('driveLinks').innerHTML = driveLinks;
 
                 // Provide a download link for the report
-                document.getElementById('downloadLink').href = `/download/report.csv`;
+                document.getElementById('downloadLink').href = processResult.csv_report;
             } else {
                 document.getElementById('message').innerText = result.message;
             }

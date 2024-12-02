@@ -11,7 +11,7 @@ def convert_pdf_to_image(pdf, output):
     poppler_fullpath = os.path.join(os.getcwd(), POPPLER_PATH)
     print(poppler_fullpath)
             
-    images = convert_from_path(pdf, poppler_path=poppler_fullpath)
+    images = convert_from_path(pdf, poppler_path=r"/opt/render/project/src/poppler-24.08.0/Library/bin")
     images_path = []
     for idx, image in enumerate(images):
         image_path = os.path.join(converted_folder, f"page_{idx+1}.png")

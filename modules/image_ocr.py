@@ -52,7 +52,6 @@ def search_for_string(text, search_term):
     
     except Exception as e:
         return f"Error encoutered in searching: {e}"
-
          
 def ocr(images, search_terms):
     items = []

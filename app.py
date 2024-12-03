@@ -1,41 +1,33 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template
-import os
-import shutil
+
+from dotenv import load_dotenv
+from flask import Flask, request, redirect, jsonify, send_from_directory, render_template, url_for, session
 from modules.image_ocr import ocr
 from modules.image_editor import edit_image
 from modules.connect_gdrive import access_drive
+from modules.creds_manager import save_credentials
+from google_auth_oauthlib.flow import Flow
+import os
+import shutil
 import json
 import csv
-
-from dotenv import load_dotenv
 
 # Load the environment variables from .env
 load_dotenv()
 
-
 app = Flask(__name__)
-
-# Temporary folder for uploads
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Ensure necessary directories exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Load config for default settings
-def load_config(config_path="configs/config.json"):
-    with open(config_path, "r") as file:
-        return json.load(file)
+app.secret_key = os.getenv('SECRET_KEY')
+with open("configs/config.json", "r") as file:
+    data = json.load(file)
 
 # Generate CSV report
-def generate_csv(data):
+def generate_csv(report):
     if not os.path.exists("reports"):
         os.makedirs("reports")
-    heading = [v for k, v in enumerate(data[0])]
+    heading = [v for k, v in enumerate(report[0])]
     with open('reports/report.csv', mode='w', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=heading)
         writer.writeheader()
-        writer.writerows(data)
+        writer.writerows(report)
 
 # Home route
 @app.route('/')
@@ -45,18 +37,17 @@ def home():
 # Upload route to handle file uploads
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    os.makedirs(data['upload_folder'], exist_ok=True)
     file = request.files['file']
     if file:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file_path = os.path.join(data['upload_folder'], file.filename)
         file.save(file_path)
         return jsonify({'message': 'File uploaded successfully', 'file_path': file_path}), 200
     return jsonify({'message': 'No file uploaded'}), 400
 
 # Process route to handle image processing and OCR
 @app.route('/process', methods=['POST'])
-def process_file():
-    data = load_config()
-    
+def process_file():    
     # Get the uploaded file path
     file_path = request.json['file_path']
     slices_count = data["slice_count_default"]
@@ -67,13 +58,15 @@ def process_file():
     # OCR processing
     items = ocr(sliced_images, data["search_terms"])
     
+    service_id = redirect(url_for('get_credential'))
+    
     # Google Drive access and upload
-    reports = access_drive("user1", items)
+    reports = access_drive("user1", items, service_id)
     
     # Generate CSV report
     generate_csv(reports)
 
-    for dir in ["outputs", "uploads", "tokens"]:
+    for dir in [data["output_folder"], data["upload_folder"], "tokens"]:
         shutil.rmtree(dir)
 
     return jsonify({
@@ -87,6 +80,37 @@ def process_file():
 @app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory('outputs', filename, as_attachment=True)
+
+@app.route('/authorize')
+def authorize():
+    flow = Flow.from_client_secrets_file(
+        'credentials/credentials_temp.json',  # Path to your client secrets file
+        scopes=['https://www.googleapis.com/auth/drive.file'],  # Set necessary scopes
+        redirect_uri='http://localhost:5000/oauth2callback'  # Your redirect URI (update for your domain)
+    )
+    authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+    session['state'] = state  # Store the state in the session to protect against CSRF attacks
+    return redirect(authorization_url)
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    flow.fetch_token(authorization_response=request.url)
+    credentials = flow.credentials
+    # Save the credentials for the user (e.g., use user session or database)
+    user_id = "user1" # You can generate a user ID based on the session
+    save_credentials(credentials, user_id)
+    return redirect(url_for('get_creds'))
+
+@app.route('/get_creds')
+def get_credential():
+    user_id = ''
+    credentials = load_credentials("user1")
+
+    if not credentials:
+        return redirect(url_for('authorize'))
+
+    # Build Google Drive service
+    return build('drive', 'v3', credentials=credentials)
 
 
 if __name__ == '__main__':

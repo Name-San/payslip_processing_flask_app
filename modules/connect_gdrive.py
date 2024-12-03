@@ -1,54 +1,11 @@
+from flask import redirect, url_for
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
+from modules.creds_manager import load_credentials
 import os
-import pickle
-import base64
 import json
 
-
-SCOPES = ['https://www.googleapis.com/auth/drive.file']
-
-
-def load_google_credentials():
-    encoded_credentials = os.getenv('GOOGLE_CREDENTIALS')
-    if not encoded_credentials:
-        raise EnvironmentError("GOOGLE_CREDENTIALS not set in environment variables")
-    
-    # Decode the Base64 string
-    credentials_json = base64.b64decode(encoded_credentials).decode('utf-8')
-    return json.loads(credentials_json)
-
-
-def authenticate_user(user_id):
-    """Authenticate a user and save their credentials separately."""
-    token_file = f'tokens/{user_id}_token.pickle'
-    creds = None
-
-    credentials = load_google_credentials()
-    with open('credentials/credentials_temp.json', 'w') as temp_file:
-        temp_file.write(json.dumps(credentials))
-
-    # Check if user's token exists
-    if os.path.exists(token_file):
-        with open(token_file, 'rb') as token:
-            creds = pickle.load(token)
-
-    # If no valid credentials, perform OAuth flow
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials/credentials_temp.json", SCOPES)
-            creds = flow.run_local_server(port=0)
-
-        # Save the credentials for the user
-        os.makedirs('tokens', exist_ok=True)
-        with open(token_file, 'wb') as token:
-            pickle.dump(creds, token)
-
-    return build('drive', 'v3', credentials=creds)
 
 def create_folder(service, folder_name, parent_folder_id):
     """Create a folder in Google Drive."""
@@ -101,10 +58,8 @@ def set_permission(service, file_id):
     }
     service.permissions().create(fileId=file_id, body=permission).execute()
 
-def access_drive(user_id, items, parent_folder_id="1xEqyKg7WC5t3QVmgfZgw26BCLBQ9C4Um"):
+def access_drive(user_id, items, service, parent_folder_id="1xEqyKg7WC5t3QVmgfZgw26BCLBQ9C4Um"):
     # Authenticate the user
-    service = authenticate_user(user_id)
-
     reports = []
     for item in items:       
         folder_name = item["folder"]

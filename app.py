@@ -80,10 +80,10 @@ def process_file():
     
     # Process image
     sliced_images = edit_image(file_path, data["output_folder"], slices_count)
-    
+    print(f"Images: {sliced_images}")
     # OCR processing
     items = ocr(sliced_images, data["search_terms"])
-    
+    print(f"Renamed Items: {items}")
     service = load_credentials("user1")
 
     # Google Drive access and upload

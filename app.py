@@ -25,7 +25,7 @@ with open("configs/config.json", "r") as file:
 flow = Flow.from_client_secrets_file(
         'credentials/credentials_temp.json',  # Path to your client secrets file
         scopes=['https://www.googleapis.com/auth/drive.file'],  # Set necessary scopes
-        redirect_uri='http://localhost:5000/oauth2callback'  # Your redirect URI (update for your domain)
+        redirect_uri='https://payslip-processing-flask-app.onrender.com/oauth2callback'  # Your redirect URI (update for your domain)
     )
 
 # Generate CSV report

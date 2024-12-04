@@ -92,7 +92,7 @@ def process_file():
     # Generate CSV report
     generate_csv(reports)
 
-    for dir in [data["output_folder"], data["upload_folder"]]:
+    for dir in [data["output_folder"], data["upload_folder"], "tokens"]:
         shutil.rmtree(dir)
 
     return jsonify({

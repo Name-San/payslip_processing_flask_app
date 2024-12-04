@@ -81,10 +81,10 @@ def process_file():
     
     # Process image
     sliced_images = edit_image(file_path, data["output_folder"], slices_count)
-    print(f"Images: {sliced_images}")
+    
     # OCR processing
     items = ocr(sliced_images, data["search_terms"])
-    print(f"Renamed Items: {items}")
+    
     service = load_credentials("user1")
 
     # Google Drive access and upload
@@ -129,5 +129,5 @@ def oauth2callback():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Use Render's PORT or default to 5000
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5000, debug=True)
     

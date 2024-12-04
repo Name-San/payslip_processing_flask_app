@@ -3,7 +3,4 @@ outputs
 extracted_images
 uploads
 .env
-tokens
-poppler*
-Tesseract-OCR
 reports

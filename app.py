@@ -90,7 +90,10 @@ def process_file():
     reports = access_drive(items, service)
 
     # Generate CSV report
-    generate_csv(reports)
+    if reports:
+        generate_csv(reports)
+    else:
+        print(f"Report file: {reports}")
 
     for dir in [data["output_folder"], data["upload_folder"], "tokens"]:
         shutil.rmtree(dir)
@@ -105,7 +108,7 @@ def process_file():
 # Download route to get the generated files
 @app.route('/download/<filename>')
 def download_file(filename):
-    return send_from_directory('outputs', filename, as_attachment=True)
+    return send_from_directory("reports", filename, as_attachment=True)
 
 @app.route('/authorize')
 def authorize():

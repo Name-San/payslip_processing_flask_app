@@ -8,6 +8,8 @@
 <body>
     <h1>OCR & Image Processing Web App</h1>
     <form id="uploadForm" enctype="multipart/form-data">
+        <label for="folder-id">Google Drive Folder:</label>
+        <input type="text" id="folder-id" placeholder="Paste folder id here">
         <label for="file">Upload PDF/Image:</label>
         <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg" required>
         <button type="submit">Upload File</button>
@@ -25,6 +27,7 @@
             event.preventDefault();
             const formData = new FormData();
             formData.append('file', document.getElementById('file').files[0]);
+
             console.log(formData)
             const response = await fetch('/upload', {
                 method: 'POST',
@@ -34,12 +37,14 @@
             if (response.ok) {
                 document.getElementById('message').innerText = result.message;
                 const filePath = result.file_path;
+                const drive_id = document.getElementById('folder-id').value;
+                console.log(drive_id)
 
                 // Start processing after upload
                 const processResponse = await fetch('/process', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ file_path: filePath })
+                    body: JSON.stringify({ file_path: filePath, drive_id: drive_id })
                 });
                 const processResult = await processResponse.json();
                 document.getElementById('message').innerText = processResult.message;

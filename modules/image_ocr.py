@@ -3,7 +3,7 @@ from PIL import Image
 import os
 
 #windows_only
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Admin\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+# pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Admin\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 
 def extract_text(image_path):
     """
@@ -22,7 +22,7 @@ def extract_text(image_path):
         text = pytesseract.image_to_string(img)
         return text
     except Exception as e:
-        return f"Error extracting text: {e}"
+        raise ValueError(f"Error extracting text: {e}")
 
 def search_for_string(text, search_term):
     """

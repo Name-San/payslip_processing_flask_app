@@ -74,6 +74,7 @@ def upload_file():
 @app.route('/process', methods=['POST'])
 def process_file():
     file_path = request.json['file_path']
+    drive_id = request.json['drive_id']
     
     # Get the uploaded file path
     slices_count = data["slice_count_default"]
@@ -87,7 +88,7 @@ def process_file():
     service = load_credentials("user1")
 
     # Google Drive access and upload
-    reports = access_drive(items, service)
+    reports = access_drive(items, service, drive_id)
 
     # Generate CSV report
     if reports:

@@ -4,9 +4,11 @@ services:
     env: python
     buildCommand: |
       apt-get update && apt-get install -y poppler-utils 
-      apt install tesseract-ocr
-      apt install libtesseract-dev
+      apt-get install -y tesseract-ocr
+      apt-get install -y libtesseract-dev
       pip install -r requirements.txt
+      command -v tesseract-ocr 
+      command -v libtesseract-dev
     startCommand: gunicorn app:app
     plan: free  # Use Render's free plan
     envVars:

@@ -55,7 +55,7 @@ def set_permission(service, file_id):
     }
     service.permissions().create(fileId=file_id, body=permission).execute()
 
-def access_drive(items, service, parent_folder_id="1xEqyKg7WC5t3QVmgfZgw26BCLBQ9C4Um"):
+def access_drive(items, service, parent_folder_id):
     # Authenticate the user
     reports = []
     for item in items:       

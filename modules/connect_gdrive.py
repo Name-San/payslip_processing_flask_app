@@ -7,6 +7,7 @@ import pickle
 import base64
 import json
 
+SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
 def authenticate_user(user_id):
     """Authenticate a user and save their credentials separately."""

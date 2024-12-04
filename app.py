@@ -18,36 +18,36 @@ import base64
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY')
+
 with open("configs/config.json", "r") as file:
     data = json.load(file)
 
-flow = Flow.from_client_secrets_file(
-        'credentials/credentials_temp.json',  # Path to your client secrets file
-        scopes=['https://www.googleapis.com/auth/drive.file'],  # Set necessary scopes
-        redirect_uri='https://payslip-processing-flask-app.onrender.com/oauth2callback'  # Your redirect URI (update for your domain)
-    )
+credentials_base64 = os.getenv("GOOGLE_CREDENTIALS")
+if not credentials_base64:
+    raise ValueError("Enviroment is not set for credentials!")
+
+credentials_json = base64.b64decode(credentials_base64).decode('utf-8')
+credentials = json.loads(credentials_json)
+os.makedirs('credentials', exist_ok=True)
+with open('credentials/credentials_temp.json', 'w') as file:
+        file.write(json.dumps(credentials))
+
+if os.path.exists('credentials/credentials_temp.json'):
+    flow = Flow.from_client_secrets_file(
+            'credentials/credentials_temp.json',  # Path to your client secrets file
+            scopes=['https://www.googleapis.com/auth/drive.file'],  # Set necessary scopes
+            redirect_uri='https://payslip-processing-flask-app.onrender.com/oauth2callback'  # Your redirect URI (update for your domain)
+        )
 
 # Generate CSV report
 def generate_csv(report):
     if not os.path.exists("reports"):
-        os.makedirs("reports")
+        os.makedirs("reports", exist_ok=True)
     heading = [v for k, v in enumerate(report[0])]
     with open('reports/report.csv', mode='w', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=heading)
         writer.writeheader()
         writer.writerows(report)
-
-def generate_creds():
-    credentials_base64 = os.getenv("GOOGLE_CREDENTIALS")
-    if not credentials_base64:
-        raise ValueError("Enviroment is not set for credentials!")
-    
-    credentials_json = base64.b64decode(credentials_base64).decode('utf-8')
-    credentials = json.loads(credentials_json)
-    with open('credentials/credentials_temp.json', 'w') as file:
-        file.write(json.dumps(credentials))
-    
 
 # Home route
 @app.route('/')
@@ -107,8 +107,6 @@ def download_file(filename):
 
 @app.route('/authorize')
 def authorize():
-    generate_creds()
-
     authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
     session['state'] = state  # Store the state in the session to protect against CSRF attacks
     return redirect(authorization_url)

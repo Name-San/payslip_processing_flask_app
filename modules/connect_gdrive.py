@@ -8,7 +8,30 @@ import base64
 import json
 
 
-SCOPES = ['https://www.googleapis.com/auth/drive.file']
+def authenticate_user(user_id):
+    """Authenticate a user and save their credentials separately."""
+    token_file = f'tokens/{user_id}_token.pickle'
+    creds = None
+
+    # Check if user's token exists
+    if os.path.exists(token_file):
+        with open(token_file, 'rb') as token:
+            creds = pickle.load(token)
+
+    # If no valid credentials, perform OAuth flow
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+
+        # Save the credentials for the user
+        os.makedirs('tokens', exist_ok=True)
+        with open(token_file, 'wb') as token:
+            pickle.dump(creds, token)
+
+    return build('drive', 'v3', credentials=creds)
 
 
 def load_google_credentials():

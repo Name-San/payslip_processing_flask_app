@@ -12,7 +12,7 @@ import json
 import csv
 import base64
 
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Load the environment variables from .env
 load_dotenv()

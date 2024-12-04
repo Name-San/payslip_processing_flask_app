@@ -1,11 +1,7 @@
 services:
   - type: web
-    name: PayslipProcessingApp
-    env: python
-    buildCommand: "./requirements.sh && pip install -r requirements.txt"
-    startCommand: gunicorn app:app
-    plan: free  # Use Render's free plan
-    envVars:
-      - key: GOOGLE_CREDENTIALS
-        sync: false  # Ensure sensitive variables are managed via Render Dashboard
-    staticPublishPath: static
+    name: my-flask-app
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    autoDeploy: true

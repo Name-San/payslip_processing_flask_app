@@ -60,7 +60,7 @@ def home():
     return render_template('index.html')
 
 # Upload route to handle file uploads
-@app.route('/   ', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
     os.makedirs(data['upload_folder'], exist_ok=True)
     file = request.files['file']

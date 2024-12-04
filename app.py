@@ -38,7 +38,7 @@ if os.path.exists('credentials/credentials_temp.json'):
     flow = Flow.from_client_secrets_file(
             'credentials/credentials_temp.json',  # Path to your client secrets file
             scopes=['https://www.googleapis.com/auth/drive.file'],  # Set necessary scopes
-            redirect_uri='https://payslip-processing-flask-app.onrender.com/oauth2callback'  # Your redirect URI (update for your domain)
+            redirect_uri=os.getenv('redirect_uri')  # Your redirect URI (update for your domain)
         )
 
 # Generate CSV report

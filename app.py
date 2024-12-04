@@ -4,12 +4,15 @@ from flask import Flask, request, redirect, jsonify, send_from_directory, render
 from modules.image_ocr import ocr
 from modules.image_editor import edit_image
 from modules.connect_gdrive import access_drive
-from modules.creds_manager import save_credentials
+from modules.creds_manager import save_credentials, load_credentials
 from google_auth_oauthlib.flow import Flow
 import os
 import shutil
 import json
 import csv
+import base64
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Load the environment variables from .env
 load_dotenv()
@@ -18,6 +21,12 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 with open("configs/config.json", "r") as file:
     data = json.load(file)
+
+flow = Flow.from_client_secrets_file(
+        'credentials/credentials_temp.json',  # Path to your client secrets file
+        scopes=['https://www.googleapis.com/auth/drive.file'],  # Set necessary scopes
+        redirect_uri='http://localhost:5000/oauth2callback'  # Your redirect URI (update for your domain)
+    )
 
 # Generate CSV report
 def generate_csv(report):
@@ -29,9 +38,23 @@ def generate_csv(report):
         writer.writeheader()
         writer.writerows(report)
 
+def generate_creds():
+    credentials_base64 = os.getenv("GOOGLE_CREDENTIALS")
+    if not credentials_base64:
+        raise ValueError("Enviroment is not set for credentials!")
+    
+    credentials_json = base64.b64decode(credentials_base64).decode('utf-8')
+    credentials = json.loads(credentials_json)
+    with open('credentials/credentials_temp.json', 'w') as file:
+        file.write(json.dumps(credentials))
+    
+
 # Home route
 @app.route('/')
 def home():
+    creds = load_credentials("user1")
+    if not creds:
+        return 'Welcome! Go to <a href="/authorize">/authorize</a> to authenticate.'
     return render_template('index.html')
 
 # Upload route to handle file uploads
@@ -47,9 +70,10 @@ def upload_file():
 
 # Process route to handle image processing and OCR
 @app.route('/process', methods=['POST'])
-def process_file():    
-    # Get the uploaded file path
+def process_file():
     file_path = request.json['file_path']
+    
+    # Get the uploaded file path
     slices_count = data["slice_count_default"]
     
     # Process image
@@ -58,15 +82,15 @@ def process_file():
     # OCR processing
     items = ocr(sliced_images, data["search_terms"])
     
-    service_id = redirect(url_for('get_credential'))
-    
+    service = load_credentials("user1")
+
     # Google Drive access and upload
-    reports = access_drive("user1", items, service_id)
-    
+    reports = access_drive(items, service)
+
     # Generate CSV report
     generate_csv(reports)
 
-    for dir in [data["output_folder"], data["upload_folder"], "tokens"]:
+    for dir in [data["output_folder"], data["upload_folder"]]:
         shutil.rmtree(dir)
 
     return jsonify({
@@ -83,11 +107,8 @@ def download_file(filename):
 
 @app.route('/authorize')
 def authorize():
-    flow = Flow.from_client_secrets_file(
-        'credentials/credentials_temp.json',  # Path to your client secrets file
-        scopes=['https://www.googleapis.com/auth/drive.file'],  # Set necessary scopes
-        redirect_uri='http://localhost:5000/oauth2callback'  # Your redirect URI (update for your domain)
-    )
+    generate_creds()
+
     authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
     session['state'] = state  # Store the state in the session to protect against CSRF attacks
     return redirect(authorization_url)
@@ -99,21 +120,10 @@ def oauth2callback():
     # Save the credentials for the user (e.g., use user session or database)
     user_id = "user1" # You can generate a user ID based on the session
     save_credentials(credentials, user_id)
-    return redirect(url_for('get_creds'))
-
-@app.route('/get_creds')
-def get_credential():
-    user_id = ''
-    credentials = load_credentials("user1")
-
-    if not credentials:
-        return redirect(url_for('authorize'))
-
-    # Build Google Drive service
-    return build('drive', 'v3', credentials=credentials)
+    return redirect(url_for('home'))
 
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Use Render's PORT or default to 5000
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(port=port, debug=True)
     

@@ -2,6 +2,7 @@ import os
 import pickle
 import base64
 import json
+from googleapiclient.discovery import build
 
 def save_credentials(credentials, user_id):
     token_file = f'tokens/{user_id}_token.pickle'
@@ -14,7 +15,8 @@ def load_credentials(user_id):
     token_file = f'tokens/{user_id}_token.pickle'
     if os.path.exists(token_file):
         with open(token_file, 'rb') as token:
-            return pickle.load(token)
+            creds = pickle.load(token)
+        return build("drive", "v3", credentials=creds)
     return None
 
 def load_google_credentials():

@@ -1,8 +1,5 @@
-from flask import redirect, url_for
-from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
+
 from googleapiclient.http import MediaFileUpload
-from modules.creds_manager import load_credentials
 import os
 import json
 
@@ -58,7 +55,7 @@ def set_permission(service, file_id):
     }
     service.permissions().create(fileId=file_id, body=permission).execute()
 
-def access_drive(user_id, items, service, parent_folder_id="1xEqyKg7WC5t3QVmgfZgw26BCLBQ9C4Um"):
+def access_drive(items, service, parent_folder_id="1xEqyKg7WC5t3QVmgfZgw26BCLBQ9C4Um"):
     # Authenticate the user
     reports = []
     for item in items:       

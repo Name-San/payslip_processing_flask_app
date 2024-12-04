@@ -19,6 +19,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
+app.secret_key = os.getenv("SECRET_KEY")
+
 with open("configs/config.json", "r") as file:
     data = json.load(file)
 
@@ -58,7 +60,7 @@ def home():
     return render_template('index.html')
 
 # Upload route to handle file uploads
-@app.route('/upload', methods=['POST'])
+@app.route('/   ', methods=['POST'])
 def upload_file():
     os.makedirs(data['upload_folder'], exist_ok=True)
     file = request.files['file']

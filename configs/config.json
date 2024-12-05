@@ -2,7 +2,6 @@
     "output_folder": "outputs",
     "upload_folder": "uploads",
     "search_terms": ["NAME", "PERIOD COVERED"],
-    "slice_count_default": 4,
     "scope": ["https://www.googleapis.com/auth/drive.file"]
     
 }

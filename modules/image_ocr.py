@@ -4,7 +4,7 @@ import os
 
 #windows_only
 ocr_path = os.getenv("TESSERACT_PATH")
-pytesseract.pytesseract.tesseract_cmd = r'tesseract-osr/tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'tesseract-ocr/tesseract.exe'
 
 def extract_text(image_path):
     """
@@ -23,7 +23,8 @@ def extract_text(image_path):
         text = pytesseract.image_to_string(img)
         return text
     except Exception as e:
-        raise ValueError(f"Error extracting text: {e}")
+        print(f"Error: {e}")
+        return None
 
 def search_for_string(text, search_term):
     """
@@ -51,7 +52,8 @@ def search_for_string(text, search_term):
             for char in range(len(term)+2, len(src_results[term]), 1):
                 filter_values.append(src_results[term][char])
             src_results[term] = ''.join(filter_values).strip()
-        
+            
+        print(src_results)   
         return src_results
     
     except Exception as e:

@@ -2,7 +2,7 @@
 from dotenv import load_dotenv
 from flask import Flask, request, redirect, jsonify, send_from_directory, render_template, url_for, session
 from modules.image_ocr import ocr
-from modules.image_editor import edit_image
+from modules.crop_images import process_image
 from modules.connect_gdrive import access_drive
 from modules.creds_manager import save_credentials, load_credentials
 from google_auth_oauthlib.flow import Flow
@@ -76,11 +76,8 @@ def process_file():
     file_path = request.json['file_path']
     drive_id = request.json['drive_id']
     
-    # Get the uploaded file path
-    slices_count = data["slice_count_default"]
-    
     # Process image
-    sliced_images = edit_image(file_path, data["output_folder"], slices_count)
+    sliced_images = process_image(file_path, data["output_folder"])
     
     # OCR processing
     items = ocr(sliced_images, data["search_terms"])

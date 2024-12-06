@@ -39,12 +39,11 @@ def dynamic_crop(image_path, output_folder):
     for idx, contour in enumerate(contours):
         # Get bounding box for each contour
         x, y, w, h = cv2.boundingRect(contour)
-        print(f"{x}, {y}, {w}, {h}")
 
         # Apply size filtering to eliminate very small/large contours
         if w > 100 and h > 50:  # Adjust based on your layout
             cropped = image[y-218:y+h, x:x+w]
-            cropped_image_path = os.path.join(output_folder, f"dynamic_crop_{idx+1}.png")
+            cropped_image_path = os.path.join(output_folder, f"{os.path.basename(image_path).split('.')[0]}_slice_{idx}.png")
             cv2.imwrite(cropped_image_path, cropped)
             cropped_images.append(cropped_image_path)
 

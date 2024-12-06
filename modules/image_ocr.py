@@ -51,9 +51,7 @@ def search_for_string(text, search_term):
             filter_values = []
             for char in range(len(term)+2, len(src_results[term]), 1):
                 filter_values.append(src_results[term][char])
-            src_results[term] = ''.join(filter_values).strip()
-            
-        print(src_results)   
+            src_results[term] = ''.join(filter_values).strip(" \\.")
         return src_results
     
     except Exception as e:
@@ -68,6 +66,10 @@ def ocr(images, search_terms):
             filename = results["NAME"]
             filedate = results["PERIOD COVERED"]
             path_fn = os.path.join(f"{os.path.dirname(image_path)}\\", f"{filename}_{filedate}.png")
+            num = 1
+            while os.path.exists(path_fn):
+                path_fn = os.path.join(f"{os.path.dirname(image_path)}\\", f"{filename}_{filedate}_{num}.png")
+                num += 1
             os.replace(image_path, path_fn)
 
             match = False
